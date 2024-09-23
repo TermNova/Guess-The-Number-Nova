@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guess The Number Game</title>
+    <style>
+        :root{--bg-color-dark:#121212;--text-color-light:#f0f0f0;--button-bg-dark:#333;--button-hover-dark:#444;}
+        body{font-family:Arial,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;margin:0;background-color:var(--bg-color-dark);color:var(--text-color-light);opacity:0;transition:opacity 1s;}
+        .container{text-align:center;max-width:600px;}
+        .text-label{margin-bottom:10px;font-size:1.5em;}
+        input[type="text"],input[type="number"]{padding:10px;font-size:1.2em;text-align:center;border-radius:5px;border:2px solid #888;width:100%;max-width:250px;}
+        .button{padding:10px 20px;margin:5px;cursor:pointer;border-radius:5px;border:none;background-color:var(--button-bg-dark);color:white;transition:background-color 0.3s;width:100%;max-width:260px;}
+        .button:hover{background-color:var(--button-hover-dark);}
+        .hidden{display:none;}
+        #settingsIcon{width:30px;height:30px;position:absolute;top:20px;right:20px;cursor:pointer;}
+        #settingsFrame{position:absolute;top:50px;right:50px;background-color:var(--button-bg-dark);border:2px solid #888;border-radius:10px;padding:10px;width:200px;max-height:250px;overflow-y:auto;display:none;}
+        .settingsButton{margin-bottom:10px;width:100%;border-radius:5px;border:none;background-color:var(--button-bg-dark);color:white;}
+        .emoji{font-size:1.5em;margin-left:10px;}
+        #loadingFrame{position:fixed;top:0;left:0;width:100%;height:100%;background-color:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;opacity:1;}
+        #loadingBox{width:300px;height:30px;background-color:white;border:2px solid #888;border-radius:10px;position:relative;}
+        #loadingProgress{height:100%;width:0;background-color:black;}
+    </style>
+</head>
+<body>
+    <div id="loadingFrame"><div id="loadingBox"><div id="loadingProgress"></div></div></div>
+    <div class="container"><div class="text-label" id="statusMessage">Guess a number between 1 and 1000.</div><input type="text" id="guessInput" maxlength="3"><button class="button" id="guessButton">Submit Guess</button><button class="button hidden" id="resetButton">Reset Game</button><div class="text-label hidden" id="resultMessage"></div><div class="guessed-numbers" id="guessedNumbers"><strong>Numbers you guessed:</strong> <span id="guessedNumbersList">None</span></div></div>
+    <img id="settingsIcon" src="https://cdn.discordapp.com/attachments/1225818486505476176/1287799595631382568/n2UbFWf.png?ex=66f2dc55&is=66f18ad5&hm=90b9d5354dbd36d5c26dda2946da1abb5d46b878799c1b8ba41df95b7d3e5f80&" alt="Settings">
+    <div id="settingsFrame"><button class="settingsButton" id="cheatingMode">Cheating Mode (Reveal Number)</button><button class="settingsButton" id="changeNumber">Change Number</button><input type="number" id="rangeInput" placeholder="Upper Limit" min="1" style="width:150px;"><button class="settingsButton" id="setRange">Set Range</button></div>
+    <script>
+        let upperLimit=1000,randomNumber=Math.floor(Math.random()*upperLimit)+1;let gameActive=true,guessedNumbersArray=[];const loadingFrame=document.getElementById('loadingFrame');const loadingProgress=document.getElementById('loadingProgress');const statusMessage=document.getElementById('statusMessage');const guessInput=document.getElementById('guessInput');const guessButton=document.getElementById('guessButton');const resetButton=document.getElementById('resetButton');const resultMessage=document.getElementById('resultMessage');const guessedNumbersList=document.getElementById('guessedNumbersList');const settingsIcon=document.getElementById('settingsIcon');const settingsFrame=document.getElementById('settingsFrame');const cheatingModeButton=document.getElementById('cheatingMode');const changeNumberButton=document.getElementById('changeNumber');const rangeInput=document.getElementById('rangeInput');const setRangeButton=document.getElementById('setRange');window.onload=()=>{let loadingTime=3000;let progress=0;const loadingInterval=setInterval(()=>{progress+=10;loadingProgress.style.width=progress+'%';if(progress>=100){clearInterval(loadingInterval);loadingFrame.style.opacity='0';setTimeout(()=>loadingFrame.style.display='none',300);document.body.style.opacity='1';}},loadingTime/10);};guessInput.addEventListener('input',function(){this.value=this.value.replace(/[^0-9]/g,'');});guessButton.addEventListener('click',function(){const userGuess=parseInt(guessInput.value);if(!gameActive||isNaN(userGuess)||userGuess<1||userGuess>upperLimit){resultMessage.textContent=`Enter a valid number!`;resultMessage.classList.remove('hidden');return;}guessedNumbersArray.push(userGuess);updateGuessedNumbers();if(userGuess===randomNumber){resultMessage.textContent=`🎉 Correct! The number was ${randomNumber}.`;resultMessage.classList.remove('hidden');showResetButton();gameActive=false;}else{resultMessage.textContent=`Wrong guess! It's ${userGuess < randomNumber ? 'higher' : 'lower'} than ${userGuess}.`;resultMessage.classList.remove('hidden');addXEmoji(userGuess);}statusMessage.textContent=`Guess a number between 1 and ${upperLimit}.`;guessInput.value='';});function addXEmoji(guess){const emoji=document.createElement('span');emoji.classList.add('emoji');emoji.textContent='❌';resultMessage.appendChild(emoji);}function updateGuessedNumbers(){guessedNumbersList.textContent=guessedNumbersArray.length ? guessedNumbersArray.join(', ') : 'None';}resetButton.addEventListener('click',resetGame);function resetGame(){randomNumber=Math.floor(Math.random()*upperLimit)+1;gameActive=true;guessedNumbersArray=[];resultMessage.textContent='';resultMessage.classList.add('hidden');resetButton.classList.add('hidden');guessedNumbersList.textContent='None';statusMessage.textContent=`Guess a number between 1 and ${upperLimit}.`;guessInput.value='';}function showResetButton(){resetButton.classList.remove('hidden');}settingsIcon.addEventListener('click',function(){settingsFrame.style.display=settingsFrame.style.display==='none'?'block':'none';});cheatingModeButton.addEventListener('click',function(){alert(`Cheating Mode Activated! The number is: ${randomNumber}`);statusMessage.textContent=`Guess a number between 1 and ${upperLimit}. Shh, it's ${randomNumber}`;});changeNumberButton.addEventListener('click',function(){randomNumber=Math.floor(Math.random()*upperLimit)+1;alert(`A new random number has been generated!`);});setRangeButton.addEventListener('click',function(){const newRange=parseInt(rangeInput.value);if(newRange&&newRange>1){upperLimit=newRange;resetGame();alert(`Upper limit set to: ${upperLimit}`);}else{alert('Enter a valid upper limit!');}});
+    </script>
+</body>
+</html>
